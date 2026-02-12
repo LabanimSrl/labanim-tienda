@@ -1,0 +1,2248 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Labanim Srl - Tienda Online</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background: #f8fafc;
+            color: #0f172a;
+        }
+
+        /* HEADER */
+        .main-header {
+            background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
+            color: white;
+            padding: 1rem 2rem;
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+        }
+
+        .header-content {
+            max-width: 1400px;
+            margin: 0 auto;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .logo h1 {
+            font-size: 1.8rem;
+            font-weight: 700;
+            background: linear-gradient(135deg, #fbbf24, #f59e0b);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .logo span {
+            font-size: 0.9rem;
+            color: #94a3b8;
+            display: block;
+        }
+
+        .nav-buttons {
+            display: flex;
+            gap: 1rem;
+            align-items: center;
+        }
+
+        .mode-btn {
+            padding: 0.7rem 2rem;
+            border: none;
+            border-radius: 50px;
+            cursor: pointer;
+            font-weight: 600;
+            font-size: 1rem;
+            transition: all 0.3s;
+        }
+
+        #btnTienda {
+            background: #10b981;
+            color: white;
+        }
+
+        #btnAdmin {
+            background: white;
+            color: #0f172a;
+        }
+
+        .cart-btn {
+            background: #8b5cf6;
+            color: white;
+            border: none;
+            padding: 0.7rem 1.5rem;
+            border-radius: 50px;
+            cursor: pointer;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .cart-count {
+            background: white;
+            color: #8b5cf6;
+            border-radius: 50%;
+            width: 24px;
+            height: 24px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.8rem;
+            font-weight: 700;
+        }
+
+        .logout-btn {
+            background: rgba(255,255,255,0.1);
+            color: white;
+            border: 1px solid rgba(255,255,255,0.2);
+            padding: 0.5rem 1.2rem;
+            border-radius: 50px;
+            cursor: pointer;
+            margin-left: 1rem;
+        }
+
+        /* LOGIN MODAL */
+        .login-modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100vh;
+            background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 10000;
+            display: none;
+        }
+
+        .login-modal.show {
+            display: flex;
+        }
+
+        .login-box {
+            background: white;
+            padding: 3rem 2rem;
+            border-radius: 24px;
+            width: 100%;
+            max-width: 400px;
+            text-align: center;
+        }
+
+        .login-box h2 {
+            font-size: 1.8rem;
+            color: #0f172a;
+            margin-bottom: 2rem;
+        }
+
+        .input-group {
+            margin-bottom: 1.5rem;
+            text-align: left;
+        }
+
+        .input-group label {
+            display: block;
+            margin-bottom: 0.5rem;
+            color: #475569;
+            font-weight: 500;
+        }
+
+        .input-group input {
+            width: 100%;
+            padding: 0.8rem 1rem;
+            border: 2px solid #e2e8f0;
+            border-radius: 12px;
+            font-size: 1rem;
+        }
+
+        .login-btn {
+            width: 100%;
+            background: linear-gradient(135deg, #8b5cf6 0%, #6366f1 100%);
+            color: white;
+            padding: 1rem;
+            border: none;
+            border-radius: 12px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            margin-top: 1rem;
+        }
+
+        .error-message {
+            color: #ef4444;
+            margin-top: 1rem;
+            display: none;
+        }
+
+        /* ADMIN PANEL */
+        .admin-panel, .user-panel {
+            display: none;
+        }
+
+        .admin-panel.show, .user-panel.show {
+            display: block;
+        }
+
+        .admin-panel {
+            background: white;
+            border-radius: 24px;
+            padding: 2rem;
+            box-shadow: 0 20px 25px -5px rgba(0,0,0,0.05);
+        }
+
+        .admin-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 2rem;
+        }
+
+        .admin-title {
+            font-size: 1.8rem;
+            font-weight: 700;
+            color: #0f172a;
+        }
+
+        .admin-badge {
+            background: linear-gradient(135deg, #8b5cf6 0%, #6366f1 100%);
+            color: white;
+            padding: 0.5rem 1.5rem;
+            border-radius: 50px;
+            font-weight: 600;
+        }
+
+        /* BOTÓN EXPORTAR */
+        .export-btn {
+            background: #10b981;
+            color: white;
+            padding: 0.8rem 2rem;
+            border: none;
+            border-radius: 12px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            transition: all 0.3s;
+            margin-left: 1rem;
+        }
+
+        .export-btn:hover {
+            background: #059669;
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px -5px rgba(16,185,129,0.3);
+        }
+
+        .admin-header-buttons {
+            display: flex;
+            gap: 1rem;
+            align-items: center;
+        }
+
+        /* SUBIR CARPETA DE FOTOS */
+        .fotos-upload {
+            background: linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 100%);
+            border: 2px dashed #0284c7;
+            border-radius: 20px;
+            padding: 2rem;
+            text-align: center;
+            margin-bottom: 2rem;
+        }
+
+        .fotos-upload i {
+            font-size: 3rem;
+            color: #0284c7;
+            margin-bottom: 1rem;
+        }
+
+        .fotos-upload h3 {
+            color: #0c4a6e;
+            margin-bottom: 0.5rem;
+        }
+
+        .fotos-info {
+            background: white;
+            padding: 1rem;
+            border-radius: 12px;
+            margin-top: 1rem;
+            font-size: 0.9rem;
+            border: 1px solid #bae6fd;
+        }
+
+        .folder-btn {
+            background: #0284c7;
+            color: white;
+            padding: 0.8rem 2rem;
+            border: none;
+            border-radius: 12px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            transition: all 0.3s;
+        }
+
+        .folder-btn:hover {
+            background: #0369a1;
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px -5px rgba(2,132,199,0.3);
+        }
+
+        /* FORMULARIO CARGA INDIVIDUAL */
+        .form-carga-individual {
+            background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
+            border-radius: 20px;
+            padding: 2rem;
+            margin-bottom: 2rem;
+            border: 2px solid #8b5cf6;
+        }
+
+        .form-titulo {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-size: 1.3rem;
+            font-weight: 700;
+            color: #0f172a;
+            margin-bottom: 1.5rem;
+        }
+
+        .form-titulo i {
+            color: #8b5cf6;
+            font-size: 1.8rem;
+        }
+
+        .form-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .form-group {
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+        }
+
+        .form-group label {
+            font-weight: 600;
+            color: #475569;
+            font-size: 0.9rem;
+        }
+
+        .form-control {
+            padding: 0.8rem 1rem;
+            border: 2px solid #e2e8f0;
+            border-radius: 12px;
+            font-size: 1rem;
+            transition: all 0.3s;
+        }
+
+        .form-control:focus {
+            border-color: #8b5cf6;
+            outline: none;
+            box-shadow: 0 0 0 3px rgba(139,92,246,0.1);
+        }
+
+        select.form-control {
+            background: white;
+            cursor: pointer;
+        }
+
+        .form-actions {
+            display: flex;
+            gap: 1rem;
+            justify-content: flex-end;
+            margin-top: 1rem;
+        }
+
+        .btn-primary {
+            background: #8b5cf6;
+            color: white;
+            padding: 0.8rem 2rem;
+            border: none;
+            border-radius: 12px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            transition: all 0.3s;
+        }
+
+        .btn-primary:hover {
+            background: #7c3aed;
+            transform: translateY(-2px);
+        }
+
+        .btn-secondary {
+            background: #64748b;
+            color: white;
+            padding: 0.8rem 2rem;
+            border: none;
+            border-radius: 12px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .btn-warning {
+            background: #f59e0b;
+            color: white;
+            padding: 0.5rem 1rem;
+            border: none;
+            border-radius: 8px;
+            font-size: 0.9rem;
+            font-weight: 600;
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.3rem;
+            transition: all 0.3s;
+        }
+
+        .btn-warning:hover {
+            background: #d97706;
+        }
+
+        .btn-danger {
+            background: #ef4444;
+            color: white;
+            padding: 0.5rem 1rem;
+            border: none;
+            border-radius: 8px;
+            font-size: 0.9rem;
+            font-weight: 600;
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.3rem;
+        }
+
+        /* EXCEL UPLOAD */
+        .excel-upload {
+            background: #f8fafc;
+            border: 2px dashed #8b5cf6;
+            border-radius: 20px;
+            padding: 2rem;
+            text-align: center;
+            margin-bottom: 2rem;
+        }
+
+        .excel-upload i {
+            font-size: 3rem;
+            color: #8b5cf6;
+            margin-bottom: 1rem;
+        }
+
+        .upload-btn {
+            background: #8b5cf6;
+            color: white;
+            padding: 0.8rem 2rem;
+            border: none;
+            border-radius: 12px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+        }
+
+        /* RUBROS */
+        .rubros-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+            gap: 1rem;
+            margin: 2rem 0;
+        }
+
+        .rubro-item {
+            background: white;
+            border: 2px solid #e2e8f0;
+            border-radius: 12px;
+            padding: 1rem;
+            text-align: center;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.3s;
+        }
+
+        .rubro-item:hover {
+            border-color: #8b5cf6;
+            transform: translateY(-2px);
+        }
+
+        .rubro-item.active {
+            background: #8b5cf6;
+            color: white;
+            border-color: #8b5cf6;
+        }
+
+        .rubro-item i {
+            display: block;
+            font-size: 1.5rem;
+            margin-bottom: 0.5rem;
+        }
+
+        /* TABLA PRODUCTOS */
+        .products-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 2rem;
+        }
+
+        .products-table th {
+            background: #f8fafc;
+            padding: 1rem;
+            text-align: left;
+            font-weight: 600;
+            color: #475569;
+        }
+
+        .products-table td {
+            padding: 1rem;
+            border-bottom: 1px solid #e2e8f0;
+        }
+
+        .codigo-badge {
+            background: #8b5cf6;
+            color: white;
+            padding: 0.2rem 0.8rem;
+            border-radius: 50px;
+            font-size: 0.8rem;
+            font-weight: 600;
+        }
+
+        .action-buttons {
+            display: flex;
+            gap: 0.5rem;
+        }
+
+        /* MODAL EDICIÓN */
+        .edit-modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100vh;
+            background: rgba(0,0,0,0.8);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 10003;
+            opacity: 0;
+            visibility: hidden;
+            transition: all 0.3s;
+            backdrop-filter: blur(5px);
+        }
+
+        .edit-modal.show {
+            opacity: 1;
+            visibility: visible;
+        }
+
+        .edit-content {
+            background: white;
+            width: 90%;
+            max-width: 600px;
+            border-radius: 24px;
+            padding: 2rem;
+            position: relative;
+        }
+
+        .edit-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 2rem;
+        }
+
+        .edit-header h3 {
+            font-size: 1.5rem;
+            color: #0f172a;
+        }
+
+        .edit-close {
+            background: none;
+            border: none;
+            font-size: 1.5rem;
+            cursor: pointer;
+            color: #64748b;
+        }
+
+        .edit-form {
+            display: flex;
+            flex-direction: column;
+            gap: 1.5rem;
+        }
+
+        .edit-group {
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+        }
+
+        .edit-group label {
+            font-weight: 600;
+            color: #475569;
+        }
+
+        .edit-group input,
+        .edit-group select,
+        .edit-group textarea {
+            padding: 0.8rem 1rem;
+            border: 2px solid #e2e8f0;
+            border-radius: 12px;
+            font-size: 1rem;
+        }
+
+        .edit-group textarea {
+            resize: vertical;
+            min-height: 100px;
+        }
+
+        .edit-actions {
+            display: flex;
+            gap: 1rem;
+            justify-content: flex-end;
+            margin-top: 1rem;
+        }
+
+        /* CATÁLOGO */
+        .catalogo-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            gap: 2rem;
+            margin-top: 2rem;
+        }
+
+        .producto-card {
+            background: white;
+            border-radius: 16px;
+            overflow: hidden;
+            box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1);
+            transition: all 0.3s;
+            cursor: pointer;
+            border: 1px solid #e2e8f0;
+            position: relative;
+        }
+
+        .producto-card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 20px 25px -5px rgba(0,0,0,0.1);
+            border-color: #8b5cf6;
+        }
+
+        .producto-imagenes {
+            height: 220px;
+            background: #f1f5f9;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
+        }
+
+        .producto-imagenes img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .producto-info {
+            padding: 1.5rem;
+        }
+
+        .producto-codigo {
+            background: #f1f5f9;
+            padding: 0.25rem 0.75rem;
+            border-radius: 50px;
+            font-size: 0.75rem;
+            color: #475569;
+            display: inline-block;
+            margin-bottom: 0.75rem;
+        }
+
+        .producto-nombre {
+            font-size: 1.2rem;
+            font-weight: 700;
+            margin-bottom: 0.5rem;
+        }
+
+        .producto-precio {
+            font-size: 1.3rem;
+            font-weight: 700;
+            color: #8b5cf6;
+            margin-top: 0.5rem;
+        }
+
+        .add-to-cart-card {
+            position: absolute;
+            bottom: 1rem;
+            right: 1rem;
+            background: #8b5cf6;
+            color: white;
+            border: none;
+            width: 44px;
+            height: 44px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            font-size: 1.2rem;
+            transition: all 0.3s;
+            opacity: 0;
+        }
+
+        .producto-card:hover .add-to-cart-card {
+            opacity: 1;
+        }
+
+        /* MODAL PRODUCTO */
+        .producto-modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100vh;
+            background: rgba(0,0,0,0.8);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 10002;
+            opacity: 0;
+            visibility: hidden;
+            transition: all 0.3s;
+            backdrop-filter: blur(5px);
+        }
+
+        .producto-modal.show {
+            opacity: 1;
+            visibility: visible;
+        }
+
+        .modal-contenido {
+            background: white;
+            width: 90%;
+            max-width: 1200px;
+            max-height: 90vh;
+            overflow-y: auto;
+            border-radius: 24px;
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 2rem;
+            padding: 2rem;
+            position: relative;
+        }
+
+        .modal-imagenes {
+            background: #f8fafc;
+            border-radius: 16px;
+            overflow: hidden;
+            height: 500px;
+            position: relative;
+        }
+
+        .carrusel-container {
+            width: 100%;
+            height: 100%;
+            position: relative;
+        }
+
+        .carrusel-slide {
+            display: none;
+            width: 100%;
+            height: 100%;
+        }
+
+        .carrusel-slide.active {
+            display: block;
+        }
+
+        .carrusel-slide img {
+            width: 100%;
+            height: 100%;
+            object-fit: contain;
+        }
+
+        .carrusel-btn {
+            position: absolute;
+            top: 50%;
+            transform: translateY(-50%);
+            background: white;
+            border: none;
+            width: 44px;
+            height: 44px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+
+        .carrusel-prev {
+            left: 1rem;
+        }
+
+        .carrusel-next {
+            right: 1rem;
+        }
+
+        .carrusel-indicators {
+            position: absolute;
+            bottom: 1rem;
+            left: 50%;
+            transform: translateX(-50%);
+            display: flex;
+            gap: 0.5rem;
+            background: rgba(0,0,0,0.5);
+            padding: 0.5rem 1rem;
+            border-radius: 50px;
+            backdrop-filter: blur(5px);
+            flex-wrap: wrap;
+            max-width: 90%;
+        }
+
+        .indicator {
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            background: rgba(255,255,255,0.5);
+            cursor: pointer;
+        }
+
+        .indicator.active {
+            background: white;
+            transform: scale(1.2);
+        }
+
+        .modal-cerrar {
+            position: absolute;
+            top: 1rem;
+            right: 1rem;
+            background: white;
+            border: none;
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            font-size: 1.2rem;
+            color: #64748b;
+            z-index: 10;
+        }
+
+        .modal-info {
+            padding: 1rem 0;
+        }
+
+        .modal-codigo {
+            background: #f1f5f9;
+            padding: 0.4rem 1rem;
+            border-radius: 50px;
+            display: inline-block;
+            font-size: 0.8rem;
+            font-weight: 600;
+            color: #475569;
+            margin-bottom: 1rem;
+        }
+
+        .modal-titulo {
+            font-size: 2rem;
+            font-weight: 700;
+            color: #0f172a;
+            margin-bottom: 1rem;
+        }
+
+        .modal-precio {
+            font-size: 2.2rem;
+            font-weight: 700;
+            color: #0f172a;
+            margin-bottom: 1.5rem;
+        }
+
+        .modal-descripcion {
+            color: #475569;
+            line-height: 1.7;
+            margin-bottom: 1.5rem;
+        }
+
+        .modal-add-to-cart {
+            display: flex;
+            gap: 1rem;
+            margin-top: 2rem;
+        }
+
+        .cantidad-selector {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            background: #f1f5f9;
+            padding: 0.5rem;
+            border-radius: 12px;
+        }
+
+        .cantidad-btn {
+            background: white;
+            border: 1px solid #e2e8f0;
+            width: 40px;
+            height: 40px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 1.2rem;
+        }
+
+        .cantidad-input {
+            width: 60px;
+            text-align: center;
+            border: 1px solid #e2e8f0;
+            border-radius: 8px;
+            padding: 0.5rem;
+        }
+
+        .add-to-cart-btn {
+            flex: 1;
+            background: #8b5cf6;
+            color: white;
+            border: none;
+            border-radius: 12px;
+            padding: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+        }
+
+        /* MODAL CARRITO */
+        .cart-modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100vh;
+            background: rgba(0,0,0,0.5);
+            display: flex;
+            justify-content: flex-end;
+            z-index: 10001;
+            opacity: 0;
+            visibility: hidden;
+            transition: all 0.3s;
+        }
+
+        .cart-modal.show {
+            opacity: 1;
+            visibility: visible;
+        }
+
+        .cart-content {
+            background: white;
+            width: 100%;
+            max-width: 500px;
+            height: 100vh;
+            padding: 2rem;
+            overflow-y: auto;
+            transform: translateX(100%);
+            transition: all 0.3s;
+        }
+
+        .cart-modal.show .cart-content {
+            transform: translateX(0);
+        }
+
+        .cart-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 2rem;
+        }
+
+        .cart-header h2 {
+            font-size: 1.5rem;
+            color: #0f172a;
+        }
+
+        .close-cart {
+            background: none;
+            border: none;
+            font-size: 1.5rem;
+            cursor: pointer;
+            color: #64748b;
+        }
+
+        .cart-items {
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+            margin-bottom: 2rem;
+        }
+
+        .cart-item {
+            display: flex;
+            gap: 1rem;
+            padding: 1rem;
+            background: #f8fafc;
+            border-radius: 12px;
+        }
+
+        .cart-item-img {
+            width: 80px;
+            height: 80px;
+            background: #e2e8f0;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .cart-item-img img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            border-radius: 8px;
+        }
+
+        .cart-item-info {
+            flex: 1;
+        }
+
+        .cart-item-title {
+            font-weight: 600;
+            margin-bottom: 0.25rem;
+        }
+
+        .cart-item-price {
+            color: #8b5cf6;
+            font-weight: 700;
+        }
+
+        .cart-item-quantity {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            margin-top: 0.5rem;
+        }
+
+        .quantity-btn {
+            background: white;
+            border: 1px solid #e2e8f0;
+            width: 30px;
+            height: 30px;
+            border-radius: 8px;
+            cursor: pointer;
+        }
+
+        .cart-total {
+            border-top: 2px solid #e2e8f0;
+            padding-top: 1rem;
+            margin-bottom: 1rem;
+        }
+
+        .total-row {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 0.5rem;
+            font-weight: 600;
+        }
+
+        .checkout-btn {
+            width: 100%;
+            background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+            color: white;
+            border: none;
+            padding: 1rem;
+            border-radius: 12px;
+            font-weight: 600;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+        }
+
+        .image-preview {
+            display: flex;
+            gap: 0.5rem;
+            margin-top: 0.5rem;
+            flex-wrap: wrap;
+        }
+
+        .preview-img {
+            width: 50px;
+            height: 50px;
+            object-fit: cover;
+            border-radius: 8px;
+        }
+
+        @media (max-width: 768px) {
+            .header-content {
+                flex-direction: column;
+                gap: 1rem;
+            }
+            .modal-contenido {
+                grid-template-columns: 1fr;
+            }
+            .modal-imagenes {
+                height: 300px;
+            }
+            .form-grid {
+                grid-template-columns: 1fr;
+            }
+            .admin-header {
+                flex-direction: column;
+                gap: 1rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- LOGIN MODAL -->
+    <div id="loginModal" class="login-modal">
+        <div class="login-box">
+            <i class="fas fa-store" style="font-size: 4rem; color: #8b5cf6; margin-bottom: 1rem;"></i>
+            <h2>Acceso Administrador</h2>
+            <div class="input-group">
+                <label>Usuario</label>
+                <input type="text" id="username" placeholder="Ingresá tu usuario">
+            </div>
+            <div class="input-group">
+                <label>Contraseña</label>
+                <input type="password" id="password" placeholder="Ingresá tu contraseña">
+            </div>
+            <button class="login-btn" onclick="login()">Ingresar</button>
+            <div id="loginError" class="error-message">Usuario o contraseña incorrectos</div>
+            <button class="login-btn" onclick="cerrarLogin()" style="background: #64748b; margin-top: 0.5rem;">Cancelar</button>
+        </div>
+    </div>
+
+    <!-- MODAL EDICIÓN DE PRODUCTO -->
+    <div id="editModal" class="edit-modal">
+        <div class="edit-content">
+            <div class="edit-header">
+                <h3><i class="fas fa-edit"></i> Editar Producto</h3>
+                <button class="edit-close" onclick="cerrarEditModal()">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <div class="edit-form">
+                <input type="hidden" id="editProductoId">
+                
+                <div class="edit-group">
+                    <label>Código</label>
+                    <input type="text" id="editCodigo" readonly style="background: #f1f5f9;">
+                </div>
+                
+                <div class="edit-group">
+                    <label>Nombre *</label>
+                    <input type="text" id="editNombre" placeholder="Nombre del producto">
+                </div>
+                
+                <div class="edit-group">
+                    <label>Descripción</label>
+                    <textarea id="editDescripcion" placeholder="Descripción completa del producto"></textarea>
+                </div>
+                
+                <div class="edit-group">
+                    <label>Cantidad por bulto</label>
+                    <input type="number" id="editCantidad" min="1">
+                </div>
+                
+                <div class="edit-group">
+                    <label>Precio *</label>
+                    <input type="number" id="editPrecio" min="0" step="1">
+                </div>
+                
+                <div class="edit-group">
+                    <label>Rubro</label>
+                    <select id="editRubro">
+                        <option value="bazar">Bazar</option>
+                        <option value="ceramica">Cerámica/Vidrio</option>
+                        <option value="regaleria">Regalería</option>
+                        <option value="blanqueria">Blanquería</option>
+                        <option value="ofertas">Ofertas $990</option>
+                    </select>
+                </div>
+                
+                <div class="edit-actions">
+                    <button class="btn-secondary" onclick="cerrarEditModal()">
+                        Cancelar
+                    </button>
+                    <button class="btn-primary" onclick="guardarEdicion()">
+                        <i class="fas fa-save"></i> Guardar Cambios
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODAL PRODUCTO -->
+    <div id="productoModal" class="producto-modal">
+        <div class="modal-contenido">
+            <button class="modal-cerrar" onclick="cerrarModal()">
+                <i class="fas fa-times"></i>
+            </button>
+            
+            <div class="modal-imagenes">
+                <div class="carrusel-container" id="modalCarrusel"></div>
+                <button class="carrusel-btn carrusel-prev" onclick="cambiarImagen(-1)">
+                    <i class="fas fa-chevron-left"></i>
+                </button>
+                <button class="carrusel-btn carrusel-next" onclick="cambiarImagen(1)">
+                    <i class="fas fa-chevron-right"></i>
+                </button>
+                <div class="carrusel-indicators" id="carruselIndicators"></div>
+            </div>
+            
+            <div class="modal-info" id="modalInfo"></div>
+        </div>
+    </div>
+
+    <!-- MODAL CARRITO -->
+    <div id="cartModal" class="cart-modal">
+        <div class="cart-content">
+            <div class="cart-header">
+                <h2><i class="fas fa-shopping-cart"></i> Tu Carrito</h2>
+                <button class="close-cart" onclick="cerrarCarrito()">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            
+            <div id="cartItems" class="cart-items"></div>
+            <div id="cartTotal" class="cart-total"></div>
+            
+            <button class="checkout-btn" onclick="generarOrdenExcel()">
+                <i class="fas fa-file-excel"></i> Generar Orden de Compra
+            </button>
+        </div>
+    </div>
+
+    <!-- HEADER -->
+    <header class="main-header">
+        <div class="header-content">
+            <div class="logo">
+                <h1>Labanim Srl</h1>
+                <span>Calidad y estilo para tu hogar</span>
+            </div>
+            <div class="nav-buttons">
+                <button id="btnTienda" class="mode-btn" onclick="showTienda()">
+                    🛍️ TIENDA
+                </button>
+                <button id="btnAdmin" class="mode-btn" onclick="showLogin()">
+                    👑 ADMIN
+                </button>
+                <button class="cart-btn" onclick="mostrarCarrito()">
+                    <i class="fas fa-shopping-cart"></i>
+                    <span id="cartCount" class="cart-count">0</span>
+                </button>
+                <button id="btnLogout" class="logout-btn" style="display: none;" onclick="logout()">
+                    <i class="fas fa-sign-out-alt"></i> Salir
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <div class="container">
+        <!-- PANEL ADMIN -->
+        <div id="adminPanel" class="admin-panel">
+            <div class="admin-header">
+                <h2 class="admin-title"><i class="fas fa-cog"></i> Panel Administrador</h2>
+                <div class="admin-header-buttons">
+                    <span class="admin-badge"><i class="fas fa-check-circle"></i> Sesión activa</span>
+                    <button class="export-btn" onclick="exportarProductos()">
+                        <i class="fas fa-download"></i> EXPORTAR PRODUCTOS
+                    </button>
+                </div>
+            </div>
+
+            <!-- SUBIR CARPETA DE FOTOS -->
+            <div class="fotos-upload">
+                <i class="fas fa-folder-open"></i>
+                <h3>📸 Subir Carpeta de Fotos</h3>
+                <p style="color: #0369a1; margin-bottom: 1rem;">Las fotos se asignan automáticamente por código</p>
+                
+                <div class="fotos-info">
+                    <strong>📁 FORMATO:</strong><br>
+                    <code style="background: #e0f2fe; padding: 0.3rem 0.8rem; border-radius: 5px;">
+                        CODIGO_1.jpg, CODIGO_2.jpg, CODIGO_3.jpg etc
+                    </code>
+                    <br><br>
+                    <span style="color: #0369a1;">✅ Ejemplo: BAZ-001_1.jpg, BAZ-001_2.jpg, BLAN-045_1.jpg</span>
+                </div>
+
+                <input type="file" id="folderUpload" webkitdirectory directory multiple style="display: none;">
+                
+                <div style="margin-top: 1.5rem;">
+                    <button class="folder-btn" onclick="document.getElementById('folderUpload').click()">
+                        <i class="fas fa-folder-open"></i> SELECCIONAR CARPETA
+                    </button>
+                </div>
+            </div>
+
+            <!-- FORMULARIO CARGA INDIVIDUAL -->
+            <div class="form-carga-individual">
+                <div class="form-titulo">
+                    <i class="fas fa-plus-circle"></i>
+                    Agregar Producto Individual
+                </div>
+                
+                <div class="form-grid">
+                    <div class="form-group">
+                        <label><i class="fas fa-barcode"></i> Código *</label>
+                        <input type="text" id="nuevoCodigo" class="form-control" placeholder="Ej: BAZ-001">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label><i class="fas fa-tag"></i> Nombre *</label>
+                        <input type="text" id="nuevoNombre" class="form-control" placeholder="Nombre del producto">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label><i class="fas fa-align-left"></i> Descripción</label>
+                        <input type="text" id="nuevoDescripcion" class="form-control" placeholder="Breve descripción">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label><i class="fas fa-box"></i> Cantidad por bulto</label>
+                        <input type="number" id="nuevoCantidad" class="form-control" value="1" min="1">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label><i class="fas fa-dollar-sign"></i> Precio *</label>
+                        <input type="number" id="nuevoPrecio" class="form-control" placeholder="0" min="0">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label><i class="fas fa-tags"></i> Rubro *</label>
+                        <select id="nuevoRubro" class="form-control">
+                            <option value="bazar">Bazar</option>
+                            <option value="ceramica">Cerámica/Vidrio</option>
+                            <option value="regaleria">Regalería</option>
+                            <option value="blanqueria">Blanquería</option>
+                            <option value="ofertas">Ofertas $990</option>
+                        </select>
+                    </div>
+                </div>
+                
+                <div class="form-actions">
+                    <button class="btn-secondary" onclick="limpiarFormulario()">
+                        <i class="fas fa-eraser"></i> Limpiar
+                    </button>
+                    <button class="btn-primary" onclick="agregarProductoIndividual()">
+                        <i class="fas fa-save"></i> Guardar Producto
+                    </button>
+                </div>
+            </div>
+
+            <!-- EXCEL UPLOAD -->
+            <div class="excel-upload">
+                <i class="fas fa-file-excel"></i>
+                <h3>📊 Carga Masiva desde Excel</h3>
+                <p style="color: #64748b; margin-bottom: 1rem;">Columnas: CODIGO | NOMBRE | DESCRIPCION | CANTIDAD | PRECIO | RUBRO</p>
+                <input type="file" id="excelUpload" accept=".xlsx,.xls,.csv" style="display: none;">
+                <div style="margin-top: 1rem;">
+                    <button class="upload-btn" onclick="document.getElementById('excelUpload').click()">
+                        <i class="fas fa-upload"></i> SUBIR EXCEL
+                    </button>
+                </div>
+            </div>
+
+            <h3>Rubros</h3>
+            <div class="rubros-grid">
+                <div class="rubro-item"><i class="fas fa-utensils"></i> Bazar</div>
+                <div class="rubro-item"><i class="fas fa-wine-glass"></i> Cerámica/Vidrio</div>
+                <div class="rubro-item"><i class="fas fa-gift"></i> Regalería</div>
+                <div class="rubro-item"><i class="fas fa-bed"></i> Blanquería</div>
+                <div class="rubro-item"><i class="fas fa-tag"></i> Ofertas $990</div>
+            </div>
+
+            <!-- TABLA PRODUCTOS -->
+            <div style="margin-top: 2rem;">
+                <div style="display: flex; justify-content: space-between; align-items: center;">
+                    <h3><i class="fas fa-boxes"></i> Productos cargados</h3>
+                    <span style="background: #8b5cf6; color: white; padding: 0.3rem 1rem; border-radius: 50px;">
+                        <span id="totalProductos">0</span> artículos
+                    </span>
+                </div>
+                <table class="products-table">
+                    <thead>
+                        <tr>
+                            <th>CÓDIGO</th>
+                            <th>NOMBRE</th>
+                            <th>DESCRIPCIÓN</th>
+                            <th>CANT/BULTO</th>
+                            <th>PRECIO</th>
+                            <th>RUBRO</th>
+                            <th>FOTOS</th>
+                            <th>ACCIONES</th>
+                        </tr>
+                    </thead>
+                    <tbody id="productosTableBody"></tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- PANEL TIENDA -->
+        <div id="tiendaPanel" class="user-panel show">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 2rem;">
+                <div>
+                    <h2 style="font-size: 2.2rem; font-weight: 700; color: #0f172a;">Nuestros productos</h2>
+                    <p style="color: #64748b; font-size: 1.1rem;">Hacé click en cualquier producto para ver detalles</p>
+                </div>
+            </div>
+            
+            <div class="rubros-grid">
+                <div class="rubro-item active" onclick="filtrarRubro('todos', this)">
+                    <i class="fas fa-th"></i> Todos
+                </div>
+                <div class="rubro-item" onclick="filtrarRubro('bazar', this)">
+                    <i class="fas fa-utensils"></i> Bazar
+                </div>
+                <div class="rubro-item" onclick="filtrarRubro('ceramica', this)">
+                    <i class="fas fa-wine-glass"></i> Cerámica/Vidrio
+                </div>
+                <div class="rubro-item" onclick="filtrarRubro('regaleria', this)">
+                    <i class="fas fa-gift"></i> Regalería
+                </div>
+                <div class="rubro-item" onclick="filtrarRubro('blanqueria', this)">
+                    <i class="fas fa-bed"></i> Blanquería
+                </div>
+                <div class="rubro-item" onclick="filtrarRubro('ofertas', this)">
+                    <i class="fas fa-tag"></i> Ofertas $990
+                </div>
+            </div>
+            
+            <div class="catalogo-grid" id="catalogoProductos"></div>
+        </div>
+    </div>
+
+    <script>
+        // ============================================
+        // CONFIGURACIÓN
+        // ============================================
+        const ADMIN_USER = 'admin';
+        const ADMIN_PASS = 'bazar2024';
+        
+        let isLoggedIn = false;
+        let productos = [];
+        let rubroFiltro = 'todos';
+        let productoActual = null;
+        let imagenActual = 0;
+        let carrito = [];
+
+        // ============================================
+        // NUEVO: EXPORTAR PRODUCTOS A ARCHIVO
+        // ============================================
+        function exportarProductos() {
+            if (productos.length === 0) {
+                alert('❌ No hay productos para exportar');
+                return;
+            }
+
+            const fecha = new Date();
+            const fechaStr = `${fecha.getDate().toString().padStart(2,'0')}-${(fecha.getMonth()+1).toString().padStart(2,'0')}-${fecha.getFullYear()}`;
+            
+            const dataStr = "// Archivo generado el " + fechaStr + "\n// Labanim Srl - Productos\n\nconst productos = " + JSON.stringify(productos, null, 2) + ";";
+            
+            const blob = new Blob([dataStr], { type: 'text/javascript' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `productos_labanim_${fechaStr}.js`;
+            a.click();
+            
+            alert(`✅ Archivo exportado correctamente\n\n📁 Nombre: productos_labanim_${fechaStr}.js\n\n📌 Instrucciones:\n1. Subí este archivo a Netlify\n2. Tus clientes verán los productos`);
+        }
+
+        // ============================================
+        // GUARDAR Y CARGAR PRODUCTOS (LOCAL)
+        // ============================================
+        function guardarProductos() {
+            localStorage.setItem('labanimProductos', JSON.stringify(productos));
+        }
+
+        function cargarProductos() {
+            const guardados = localStorage.getItem('labanimProductos');
+            if (guardados) {
+                productos = JSON.parse(guardados);
+            }
+        }
+
+        // ============================================
+        // SUBIR CARPETA DE FOTOS
+        // ============================================
+        document.getElementById('folderUpload').addEventListener('change', async function(e) {
+            if (!isLoggedIn) {
+                alert('❌ Iniciá sesión primero');
+                showLogin();
+                return;
+            }
+
+            const files = Array.from(e.target.files);
+            let asignadas = 0;
+            let noEncontrados = [];
+
+            for (const file of files) {
+                const nombreArchivo = file.name;
+                const codigoMatch = nombreArchivo.match(/^([^_]+)/);
+                
+                if (codigoMatch) {
+                    const codigo = codigoMatch[1];
+                    const producto = productos.find(p => p.codigo === codigo);
+                    
+                    if (producto) {
+                        try {
+                            const imagenData = await leerArchivoComoDataURL(file);
+                            if (!producto.imagenes) producto.imagenes = [];
+                            producto.imagenes.push(imagenData);
+                            asignadas++;
+                        } catch (error) {
+                            console.error('Error leyendo archivo:', file.name);
+                        }
+                    } else {
+                        noEncontrados.push(codigo);
+                    }
+                }
+            }
+
+            renderTablaProductos();
+            renderCatalogo();
+            guardarProductos();
+            
+            if (asignadas > 0) {
+                alert(`✅ ${asignadas} foto(s) asignadas correctamente`);
+            }
+            if (noEncontrados.length > 0) {
+                alert(`⚠️ No se encontraron productos con estos códigos: ${[...new Set(noEncontrados)].join(', ')}`);
+            }
+            
+            e.target.value = '';
+        });
+
+        function leerArchivoComoDataURL(file) {
+            return new Promise((resolve, reject) => {
+                const reader = new FileReader();
+                reader.onload = () => resolve(reader.result);
+                reader.onerror = reject;
+                reader.readAsDataURL(file);
+            });
+        }
+
+        // ============================================
+        // FUNCIONES DE EDICIÓN
+        // ============================================
+        function abrirEditModal(index) {
+            const producto = productos[index];
+            
+            document.getElementById('editProductoId').value = index;
+            document.getElementById('editCodigo').value = producto.codigo || '';
+            document.getElementById('editNombre').value = producto.nombre || '';
+            document.getElementById('editDescripcion').value = producto.descripcion || '';
+            document.getElementById('editCantidad').value = producto.cantidadBulto || 1;
+            document.getElementById('editPrecio').value = producto.precio || 0;
+            document.getElementById('editRubro').value = producto.rubro || 'bazar';
+            
+            document.getElementById('editModal').classList.add('show');
+        }
+
+        function cerrarEditModal() {
+            document.getElementById('editModal').classList.remove('show');
+        }
+
+        function guardarEdicion() {
+            const index = document.getElementById('editProductoId').value;
+            const producto = productos[index];
+            
+            const nombre = document.getElementById('editNombre').value.trim();
+            const precio = parseFloat(document.getElementById('editPrecio').value);
+            
+            if (!nombre) {
+                alert('❌ El nombre es obligatorio');
+                return;
+            }
+            if (precio <= 0) {
+                alert('❌ El precio debe ser mayor a 0');
+                return;
+            }
+            
+            producto.nombre = nombre;
+            producto.descripcion = document.getElementById('editDescripcion').value.trim();
+            producto.cantidadBulto = parseInt(document.getElementById('editCantidad').value) || 1;
+            producto.precio = precio;
+            producto.rubro = document.getElementById('editRubro').value;
+            
+            renderTablaProductos();
+            renderCatalogo();
+            guardarProductos();
+            
+            cerrarEditModal();
+            alert('✅ Producto actualizado correctamente');
+        }
+
+        // ============================================
+        // FUNCIONES DE PRODUCTOS
+        // ============================================
+        function agregarProductoIndividual() {
+            if (!isLoggedIn) {
+                alert('❌ Iniciá sesión primero');
+                showLogin();
+                return;
+            }
+
+            const codigo = document.getElementById('nuevoCodigo').value.trim();
+            const nombre = document.getElementById('nuevoNombre').value.trim();
+            const descripcion = document.getElementById('nuevoDescripcion').value.trim();
+            const cantidad = parseInt(document.getElementById('nuevoCantidad').value) || 1;
+            const precio = parseFloat(document.getElementById('nuevoPrecio').value) || 0;
+            const rubro = document.getElementById('nuevoRubro').value;
+
+            if (!codigo) {
+                alert('❌ El código es obligatorio');
+                return;
+            }
+            if (!nombre) {
+                alert('❌ El nombre es obligatorio');
+                return;
+            }
+            if (precio <= 0) {
+                alert('❌ El precio debe ser mayor a 0');
+                return;
+            }
+
+            const nuevoProducto = {
+                id: Date.now() + Math.random().toString(),
+                codigo: codigo,
+                nombre: nombre,
+                descripcion: descripcion || 'Sin descripción',
+                cantidadBulto: cantidad,
+                precio: precio,
+                rubro: rubro,
+                imagenes: []
+            };
+
+            productos.push(nuevoProducto);
+            renderTablaProductos();
+            renderCatalogo();
+            guardarProductos();
+            limpiarFormulario();
+            alert('✅ Producto agregado correctamente');
+        }
+
+        function limpiarFormulario() {
+            document.getElementById('nuevoCodigo').value = '';
+            document.getElementById('nuevoNombre').value = '';
+            document.getElementById('nuevoDescripcion').value = '';
+            document.getElementById('nuevoCantidad').value = '1';
+            document.getElementById('nuevoPrecio').value = '';
+            document.getElementById('nuevoRubro').value = 'bazar';
+        }
+
+        function agregarImagenes(index) {
+            if (!isLoggedIn) { 
+                alert('Iniciá sesión primero'); 
+                showLogin();
+                return; 
+            }
+            
+            const input = document.createElement('input');
+            input.type = 'file';
+            input.accept = 'image/*';
+            input.multiple = true;
+            input.onchange = function(e) {
+                const files = Array.from(e.target.files);
+                files.forEach(file => {
+                    const reader = new FileReader();
+                    reader.onload = function(event) {
+                        if (!productos[index].imagenes) productos[index].imagenes = [];
+                        productos[index].imagenes.push(event.target.result);
+                        renderTablaProductos();
+                        renderCatalogo();
+                        guardarProductos();
+                    };
+                    reader.readAsDataURL(file);
+                });
+                alert(`✅ ${files.length} foto(s) agregadas`);
+            };
+            input.click();
+        }
+
+        function eliminarProducto(index) {
+            if (!isLoggedIn) { 
+                alert('Iniciá sesión primero'); 
+                showLogin();
+                return; 
+            }
+            
+            if (confirm('¿Eliminar producto?')) {
+                productos.splice(index, 1);
+                renderTablaProductos();
+                renderCatalogo();
+                guardarProductos();
+            }
+        }
+
+        // ============================================
+        // FUNCIONES DE CARRITO
+        // ============================================
+        function agregarAlCarrito(productoId, cantidad = 1) {
+            const producto = productos.find(p => p.id === productoId);
+            if (!producto) return;
+            
+            const itemExistente = carrito.find(item => item.id === productoId);
+            
+            if (itemExistente) {
+                itemExistente.cantidad += cantidad;
+            } else {
+                carrito.push({
+                    id: producto.id,
+                    codigo: producto.codigo,
+                    nombre: producto.nombre,
+                    precio: producto.precio,
+                    cantidad: cantidad,
+                    imagen: producto.imagenes && producto.imagenes.length > 0 ? producto.imagenes[0] : null
+                });
+            }
+            
+            actualizarCarrito();
+            mostrarCarrito();
+        }
+
+        function quitarDelCarrito(productoId) {
+            carrito = carrito.filter(item => item.id !== productoId);
+            actualizarCarrito();
+        }
+
+        function actualizarCantidad(productoId, nuevaCantidad) {
+            if (nuevaCantidad <= 0) {
+                quitarDelCarrito(productoId);
+                return;
+            }
+            
+            const item = carrito.find(item => item.id === productoId);
+            if (item) {
+                item.cantidad = nuevaCantidad;
+                actualizarCarrito();
+            }
+        }
+
+        function actualizarCarrito() {
+            const totalItems = carrito.reduce((sum, item) => sum + item.cantidad, 0);
+            document.getElementById('cartCount').textContent = totalItems;
+            
+            const cartItemsContainer = document.getElementById('cartItems');
+            if (cartItemsContainer) {
+                if (carrito.length === 0) {
+                    cartItemsContainer.innerHTML = '<p style="text-align: center; color: #64748b;">Tu carrito está vacío</p>';
+                } else {
+                    cartItemsContainer.innerHTML = carrito.map(item => `
+                        <div class="cart-item">
+                            <div class="cart-item-img">
+                                ${item.imagen ? `<img src="${item.imagen}" style="width:100%; height:100%; object-fit:cover;">` : '<i class="fas fa-box"></i>'}
+                            </div>
+                            <div class="cart-item-info">
+                                <div class="cart-item-title">${item.nombre}</div>
+                                <div class="cart-item-price">$${item.precio.toLocaleString()}</div>
+                                <div class="cart-item-quantity">
+                                    <button class="quantity-btn" onclick="actualizarCantidad('${item.id}', ${item.cantidad - 1})">-</button>
+                                    <span>${item.cantidad}</span>
+                                    <button class="quantity-btn" onclick="actualizarCantidad('${item.id}', ${item.cantidad + 1})">+</button>
+                                    <button class="quantity-btn" onclick="quitarDelCarrito('${item.id}')" style="background: #ef4444; color: white; border: none;">×</button>
+                                </div>
+                            </div>
+                        </div>
+                    `).join('');
+                }
+            }
+            
+            const totalContainer = document.getElementById('cartTotal');
+            const total = carrito.reduce((sum, item) => sum + (item.precio * item.cantidad), 0);
+            totalContainer.innerHTML = `
+                <div class="total-row">
+                    <span>Subtotal:</span>
+                    <span>$${total.toLocaleString()}</span>
+                </div>
+                <div class="total-row">
+                    <span>Total:</span>
+                    <span style="color: #8b5cf6; font-size: 1.2rem;">$${total.toLocaleString()}</span>
+                </div>
+            `;
+        }
+
+        function mostrarCarrito() {
+            document.getElementById('cartModal').classList.add('show');
+        }
+
+        function cerrarCarrito() {
+            document.getElementById('cartModal').classList.remove('show');
+        }
+
+        // ============================================
+        // GENERAR ORDEN DE COMPRA
+        // ============================================
+        function generarOrdenExcel() {
+            if (carrito.length === 0) {
+                alert('❌ El carrito está vacío');
+                return;
+            }
+
+            const ordenData = [
+                ['FECHA', 'HORA', 'PRODUCTO', 'CÓDIGO', 'CANTIDAD', 'PRECIO UNIT.', 'SUBTOTAL'],
+                ...carrito.map(item => [
+                    new Date().toLocaleDateString('es-AR'),
+                    new Date().toLocaleTimeString('es-AR'),
+                    item.nombre,
+                    item.codigo || 'S/C',
+                    item.cantidad,
+                    `$${item.precio.toLocaleString()}`,
+                    `$${(item.precio * item.cantidad).toLocaleString()}`
+                ]),
+                [],
+                ['TOTAL GENERAL', '', '', '', '', '', `$${carrito.reduce((sum, item) => sum + (item.precio * item.cantidad), 0).toLocaleString()}`],
+                [],
+                ['DATOS DEL CLIENTE'],
+                ['Nombre:', '____________________'],
+                ['Teléfono:', '____________________'],
+                ['Dirección:', '____________________'],
+                ['Método de pago:', '____________________']
+            ];
+
+            const wb = XLSX.utils.book_new();
+            const ws = XLSX.utils.aoa_to_sheet(ordenData);
+            
+            ws['!cols'] = [
+                { wch: 12 }, { wch: 10 }, { wch: 30 }, { wch: 15 }, 
+                { wch: 10 }, { wch: 15 }, { wch: 15 }
+            ];
+
+            XLSX.utils.book_append_sheet(wb, ws, 'Orden de Compra');
+            
+            const fecha = new Date();
+            const fechaStr = `${fecha.getDate().toString().padStart(2,'0')}-${(fecha.getMonth()+1).toString().padStart(2,'0')}-${fecha.getFullYear()}`;
+            const horaStr = `${fecha.getHours().toString().padStart(2,'0')}.${fecha.getMinutes().toString().padStart(2,'0')}`;
+            
+            XLSX.writeFile(wb, `Pedido_Labanim_${fechaStr}_${horaStr}.xlsx`);
+            alert('✅ Orden de compra generada correctamente');
+        }
+
+        // ============================================
+        // LOGIN
+        // ============================================
+        function login() {
+            const user = document.getElementById('username').value;
+            const pass = document.getElementById('password').value;
+            
+            if (user === ADMIN_USER && pass === ADMIN_PASS) {
+                isLoggedIn = true;
+                document.getElementById('loginModal').classList.remove('show');
+                document.getElementById('adminPanel').classList.add('show');
+                document.getElementById('tiendaPanel').classList.remove('show');
+                document.getElementById('btnLogout').style.display = 'inline-block';
+                document.getElementById('loginError').style.display = 'none';
+                
+                document.getElementById('username').value = '';
+                document.getElementById('password').value = '';
+                
+                renderTablaProductos();
+            } else {
+                document.getElementById('loginError').style.display = 'block';
+            }
+        }
+
+        function logout() {
+            isLoggedIn = false;
+            document.getElementById('adminPanel').classList.remove('show');
+            document.getElementById('tiendaPanel').classList.add('show');
+            document.getElementById('btnLogout').style.display = 'none';
+        }
+
+        function showTienda() {
+            document.getElementById('adminPanel').classList.remove('show');
+            document.getElementById('tiendaPanel').classList.add('show');
+            document.getElementById('btnLogout').style.display = 'none';
+            renderCatalogo();
+        }
+
+        function showLogin() {
+            if (!isLoggedIn) {
+                document.getElementById('loginModal').classList.add('show');
+            } else {
+                document.getElementById('adminPanel').classList.add('show');
+                document.getElementById('tiendaPanel').classList.remove('show');
+                document.getElementById('btnLogout').style.display = 'inline-block';
+            }
+        }
+
+        function cerrarLogin() {
+            document.getElementById('loginModal').classList.remove('show');
+        }
+
+        // ============================================
+        // EXCEL UPLOAD
+        // ============================================
+        document.getElementById('excelUpload').addEventListener('change', function(e) {
+            if (!isLoggedIn) {
+                alert('❌ Iniciá sesión primero');
+                showLogin();
+                return;
+            }
+
+            const file = e.target.files[0];
+            const reader = new FileReader();
+
+            reader.onload = function(event) {
+                try {
+                    const data = new Uint8Array(event.target.result);
+                    const workbook = XLSX.read(data, {type: 'array'});
+                    const worksheet = workbook.Sheets[workbook.SheetNames[0]];
+                    const jsonData = XLSX.utils.sheet_to_json(worksheet);
+                    
+                    let contador = 0;
+
+                    jsonData.forEach(row => {
+                        const codigo = row.CODIGO || row.codigo || `ART-${Date.now()}-${contador}`;
+                        const nombre = row.NOMBRE || row.nombre || row.Producto;
+                        const descripcion = row.DESCRIPCION || row.descripcion || '';
+                        const cantidad = row.CANTIDAD || row.cantidad || 1;
+                        const precio = row.PRECIO || row.precio || 0;
+                        let rubro = row.RUBRO || row.rubro || 'bazar';
+                        
+                        rubro = rubro.toString().toLowerCase().trim();
+                        if (!['bazar','ceramica','regaleria','blanqueria','ofertas'].includes(rubro)) {
+                            rubro = 'bazar';
+                        }
+
+                        if (codigo && nombre) {
+                            productos.push({
+                                id: Date.now() + Math.random() + contador,
+                                codigo: codigo.toString().trim(),
+                                nombre: nombre.toString().trim(),
+                                descripcion: descripcion.toString().trim(),
+                                cantidadBulto: parseInt(cantidad) || 1,
+                                precio: parseFloat(precio) || 0,
+                                rubro: rubro,
+                                imagenes: []
+                            });
+                            contador++;
+                        }
+                    });
+
+                    if (contador > 0) {
+                        renderTablaProductos();
+                        renderCatalogo();
+                        guardarProductos();
+                        alert(`✅ Se cargaron ${contador} productos`);
+                    }
+                    
+                    e.target.value = '';
+                } catch (error) {
+                    alert('❌ Error al leer el Excel');
+                }
+            };
+            reader.readAsArrayBuffer(file);
+        });
+
+        // ============================================
+        // MODAL DE PRODUCTO
+        // ============================================
+        function verDetalleProducto(productoId) {
+            productoActual = productos.find(p => p.id === productoId);
+            if (!productoActual) return;
+            
+            imagenActual = 0;
+            
+            const carruselContainer = document.getElementById('modalCarrusel');
+            const indicatorsContainer = document.getElementById('carruselIndicators');
+            
+            let imagenesHTML = '';
+            let indicatorsHTML = '';
+            
+            if (productoActual.imagenes && productoActual.imagenes.length > 0) {
+                productoActual.imagenes.forEach((img, index) => {
+                    imagenesHTML += `
+                        <div class="carrusel-slide ${index === 0 ? 'active' : ''}">
+                            <img src="${img}" alt="${productoActual.nombre}">
+                        </div>
+                    `;
+                    indicatorsHTML += `
+                        <div class="indicator ${index === 0 ? 'active' : ''}" onclick="irAImagen(${index})"></div>
+                    `;
+                });
+            } else {
+                imagenesHTML = `
+                    <div class="carrusel-slide active">
+                        <div style="width:100%; height:100%; display:flex; align-items:center; justify-content:center; background:#f8fafc;">
+                            <i class="fas fa-image" style="font-size: 5rem; color: #94a3b8;"></i>
+                        </div>
+                    </div>
+                `;
+                indicatorsHTML = `<div class="indicator active"></div>`;
+            }
+            
+            carruselContainer.innerHTML = imagenesHTML;
+            indicatorsContainer.innerHTML = indicatorsHTML;
+            
+            document.getElementById('modalInfo').innerHTML = `
+                <span class="modal-codigo"><i class="fas fa-barcode"></i> ${productoActual.codigo || 'S/C'}</span>
+                <h2 class="modal-titulo">${productoActual.nombre}</h2>
+                <div class="modal-precio">
+                    $${productoActual.precio?.toLocaleString() || 0}
+                    <span>por bulto</span>
+                </div>
+                <div class="modal-descripcion">
+                    ${productoActual.descripcion || 'Sin descripción disponible'}
+                </div>
+                <div class="modal-add-to-cart">
+                    <div class="cantidad-selector">
+                        <button class="cantidad-btn" onclick="cambiarCantidadModal(-1)">-</button>
+                        <input type="number" id="modalCantidad" class="cantidad-input" value="1" min="1">
+                        <button class="cantidad-btn" onclick="cambiarCantidadModal(1)">+</button>
+                    </div>
+                    <button class="add-to-cart-btn" onclick="agregarAlCarritoDesdeModal('${productoActual.id}')">
+                        <i class="fas fa-shopping-cart"></i> Agregar
+                    </button>
+                </div>
+            `;
+            
+            document.getElementById('productoModal').classList.add('show');
+            document.body.style.overflow = 'hidden';
+        }
+
+        function cambiarCantidadModal(delta) {
+            const input = document.getElementById('modalCantidad');
+            if (input) {
+                let valor = parseInt(input.value) || 1;
+                valor += delta;
+                if (valor < 1) valor = 1;
+                input.value = valor;
+            }
+        }
+
+        function agregarAlCarritoDesdeModal(productoId) {
+            const cantidad = parseInt(document.getElementById('modalCantidad')?.value || 1);
+            agregarAlCarrito(productoId, cantidad);
+            cerrarModal();
+        }
+
+        function cerrarModal() {
+            document.getElementById('productoModal').classList.remove('show');
+            document.body.style.overflow = 'auto';
+            productoActual = null;
+        }
+
+        function cambiarImagen(direccion) {
+            if (!productoActual || !productoActual.imagenes || productoActual.imagenes.length === 0) return;
+            
+            imagenActual += direccion;
+            if (imagenActual < 0) imagenActual = productoActual.imagenes.length - 1;
+            if (imagenActual >= productoActual.imagenes.length) imagenActual = 0;
+            
+            actualizarCarrusel();
+        }
+
+        function irAImagen(index) {
+            imagenActual = index;
+            actualizarCarrusel();
+        }
+
+        function actualizarCarrusel() {
+            const slides = document.querySelectorAll('.carrusel-slide');
+            const indicators = document.querySelectorAll('.indicator');
+            
+            slides.forEach((slide, i) => slide.classList.toggle('active', i === imagenActual));
+            indicators.forEach((ind, i) => ind.classList.toggle('active', i === imagenActual));
+        }
+
+        // ============================================
+        // FILTROS
+        // ============================================
+        function filtrarRubro(rubro, element) {
+            rubroFiltro = rubro;
+            document.querySelectorAll('.user-panel .rubro-item').forEach(el => el.classList.remove('active'));
+            element.classList.add('active');
+            renderCatalogo();
+        }
+
+        // ============================================
+        // RENDERIZAR TABLA ADMIN
+        // ============================================
+        function renderTablaProductos() {
+            const tbody = document.getElementById('productosTableBody');
+            if (!tbody) return;
+            
+            if (productos.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="8" style="text-align:center; padding:2rem;">No hay productos cargados</td></tr>';
+                document.getElementById('totalProductos').textContent = '0';
+                return;
+            }
+            
+            tbody.innerHTML = '';
+            document.getElementById('totalProductos').textContent = productos.length;
+
+            productos.forEach((p, i) => {
+                const row = document.createElement('tr');
+                row.innerHTML = `
+                    <td><span class="codigo-badge">${p.codigo || 'S/C'}</span></td>
+                    <td><strong>${p.nombre}</strong></td>
+                    <td>${p.descripcion.substring(0,50)}${p.descripcion.length>50?'...':''}</td>
+                    <td>${p.cantidadBulto}</td>
+                    <td>$${p.precio?.toLocaleString() || 0}</td>
+                    <td><span style="background:#e2e8f0; padding:0.2rem 0.8rem; border-radius:50px;">${p.rubro}</span></td>
+                    <td>
+                        <button onclick="agregarImagenes(${i})" class="upload-btn" style="padding:0.3rem 0.8rem; font-size:0.8rem; background:#10b981;">
+                            <i class="fas fa-camera"></i> ${p.imagenes?.length || 0} fotos
+                        </button>
+                        <div id="previews-${i}" class="image-preview"></div>
+                    </td>
+                    <td>
+                        <div class="action-buttons">
+                            <button onclick="abrirEditModal(${i})" class="btn-warning" style="padding:0.3rem 0.8rem;">
+                                <i class="fas fa-edit"></i>
+                            </button>
+                            <button onclick="eliminarProducto(${i})" class="btn-danger" style="padding:0.3rem 0.8rem;">
+                                <i class="fas fa-trash"></i>
+                            </button>
+                        </div>
+                    </td>
+                `;
+                tbody.appendChild(row);
+
+                const previewDiv = document.getElementById(`previews-${i}`);
+                if (previewDiv && p.imagenes) {
+                    p.imagenes.forEach(img => {
+                        const imgEl = document.createElement('img');
+                        imgEl.src = img;
+                        imgEl.className = 'preview-img';
+                        previewDiv.appendChild(imgEl);
+                    });
+                }
+            });
+        }
+
+        // ============================================
+        // RENDERIZAR CATÁLOGO
+        // ============================================
+        function renderCatalogo() {
+            const catalogo = document.getElementById('catalogoProductos');
+            if (!catalogo) return;
+            
+            if (productos.length === 0) {
+                catalogo.innerHTML = '<div style="grid-column:1/-1; text-align:center; padding:4rem;"><i class="fas fa-box-open" style="font-size:4rem; color:#94a3b8;"></i><h3 style="margin-top:1rem;">No hay productos disponibles</h3></div>';
+                return;
+            }
+
+            let filtrados = productos;
+            if (rubroFiltro !== 'todos') filtrados = productos.filter(p => p.rubro === rubroFiltro);
+
+            if (filtrados.length === 0) {
+                catalogo.innerHTML = '<div style="grid-column:1/-1; text-align:center; padding:4rem;"><i class="fas fa-filter" style="font-size:4rem; color:#94a3b8;"></i><h3 style="margin-top:1rem;">No hay productos en esta categoría</h3></div>';
+                return;
+            }
+
+            catalogo.innerHTML = '';
+            filtrados.forEach(p => {
+                const card = document.createElement('div');
+                card.className = 'producto-card';
+                card.onclick = () => verDetalleProducto(p.id);
+                
+                let imagenHTML = '';
+                if (p.imagenes && p.imagenes.length > 0) {
+                    imagenHTML = `<img src="${p.imagenes[0]}" alt="${p.nombre}">`;
+                } else {
+                    imagenHTML = `<i class="fas fa-image"></i>`;
+                }
+
+                card.innerHTML = `
+                    <div class="producto-imagenes">
+                        ${imagenHTML}
+                    </div>
+                    <div class="producto-info">
+                        <span class="producto-codigo">${p.codigo || 'S/C'}</span>
+                        <h3 class="producto-nombre">${p.nombre}</h3>
+                        <div class="producto-precio">$${p.precio?.toLocaleString() || 0}</div>
+                        <button class="add-to-cart-card" onclick="event.stopPropagation(); agregarAlCarrito('${p.id}', 1)">
+                            <i class="fas fa-shopping-cart"></i>
+                        </button>
+                    </div>
+                `;
+                catalogo.appendChild(card);
+            });
+        }
+
+        // ============================================
+        // INICIALIZAR
+        // ============================================
+        function init() {
+            cargarProductos();
+            
+            if (productos.length === 0) {
+                productos = [
+                    {
+                        id: '1',
+                        codigo: 'BAZ-001',
+                        nombre: 'Juego de Vasos Premium',
+                        descripcion: 'Set de 6 vasos de vidrio templado resistente al horno y microondas. Ideales para restaurantes y hogar.',
+                        cantidadBulto: 12,
+                        precio: 4500,
+                        rubro: 'bazar',
+                        imagenes: [
+                            'https://images.unsplash.com/photo-1574071326196-bcfb2a827785?w=500'
+                        ]
+                    },
+                    {
+                        id: '2',
+                        codigo: 'BLAN-045',
+                        nombre: 'Sábanas King Size',
+                        descripcion: 'Juego de sábanas de algodón egipcio 1000 hilos. Incluye sábana ajustable, sábana superior y 2 fundas.',
+                        cantidadBulto: 6,
+                        precio: 12900,
+                        rubro: 'blanqueria',
+                        imagenes: [
+                            'https://images.unsplash.com/photo-1629949002438-d74e97a5ebf0?w=500'
+                        ]
+                    }
+                ];
+                guardarProductos();
+            }
+            
+            showTienda();
+            renderCatalogo();
+            renderTablaProductos();
+            actualizarCarrito();
+        }
+
+        // Cerrar modales con tecla ESC
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'Escape') {
+                cerrarModal();
+                cerrarLogin();
+                cerrarCarrito();
+                cerrarEditModal();
+            }
+        });
+
+        init();
+    </script>
+</body>
+</html>
